@@ -5,6 +5,8 @@ import seaborn as sns
 from pathlib import Path
 import torch.nn.functional as F
 
+from simple.utils import create_mappings, read_words
+
 
 output_folder = Path(__file__).parent / "output"
 if not output_folder.exists():
@@ -21,9 +23,9 @@ class BigramNameGenerator:
 
         :param filename: A path to the file containing names.
         """
-        self.words = self.read_words(filename)
+        self.words = read_words(filename)
         self.bigrams = self.bigram_counts()
-        self.stoi, self.itos = self.create_mappings()
+        self.stoi, self.itos = create_mappings(self.words)
 
         # Table of Probabilities
         self.N = self.calculate_bigram_counts_matrix()
@@ -33,17 +35,6 @@ class BigramNameGenerator:
         self.xs, self.ys = self.create_dataset()
         self.W = self.initialize_network()
 
-
-    def read_words(self, filename: Path) -> list:
-        """
-        Reads words from a file.
-
-        :param filename: A path to the file.
-        :return: A list of words.
-        """
-        with open(filename, "r") as file:
-            words = file.read().splitlines()
-        return words
 
     def bigram_counts(self) -> dict:
         """
@@ -58,19 +49,6 @@ class BigramNameGenerator:
                 bigram = (ch1, ch2)
                 b[bigram] = b.get(bigram, 0) + 1
         return dict(sorted(b.items(), key=lambda x: x[1], reverse=True))
-
-    def create_mappings(self) -> tuple:
-        """
-        Creates mappings from characters to indices and vice versa.
-
-        :return: A tuple of two dictionaries (stoi, itos).
-        """
-        unique_chars = sorted(list(set("".join(self.words))))
-        stoi = {s: enum+1 for enum, s in enumerate(unique_chars)}
-        stoi["."] = 0
-        stoi = dict(sorted([(k, v) for k, v in stoi.items()], key=lambda x: x[1]))
-        itos = {i: s for s, i in stoi.items()}
-        return stoi, itos
 
     def calculate_bigram_counts_matrix(self) -> torch.Tensor:
         """
@@ -120,7 +98,6 @@ class BigramNameGenerator:
             plt.xlabel("second letter")
             plt.ylabel("first letter")
         plt.savefig(output_folder / filename)
-
 
     def generate_names_tabular(self, num_names: int = 10) -> list:
         """
@@ -254,40 +231,83 @@ class BigramNameGenerator:
         """
         Performs a forward pass on the neural network.
 
-        :param xenc: One-hot encoded input tensor.
+        :param xenc: One-hot encoded input tensor. This tensor represents the input characters
+                    in a one-hot encoded format, which is suitable for processing by the neural network.
 
-        :return: Probabilities tensor for the next character.
+        :return: A tensor representing the probabilities of the next character.
         """
-        logits = xenc @ self.W  # Predict log-counts
-        counts = logits.exp()  # Counts, equivalent to N
-        probs = counts / counts.sum(1, keepdims=True)  # Softmax function for probabilities
+
+        # Multiply the input encoding by the weight matrix (W) to get logits.
+        # Logits are essentially the raw predictions made by the network before applying any activation function.
+        logits = xenc @ self.W  
+
+        # Apply the exponential function to the logits to get the counts. This step converts the logits
+        # (which can be any real number) into positive counts and is a part of the softmax function.
+        counts = logits.exp()  
+
+        # Normalize the counts to get probabilities. The softmax function is implemented here by dividing
+        # each count by the sum of all counts. This ensures that the output is a valid probability distribution.
+        probs = counts / counts.sum(1, keepdims=True)  
+
         return probs
+
 
     def train_model(self, learning_rate=0.01, epochs=1, reg_lambda=0.01):
         """
         Trains the model using gradient descent.
 
+        :param learning_rate: Learning rate for gradient descent. Determines the step size at each iteration while moving toward a minimum of a loss function.
+        :param epochs: Number of training iterations. Each epoch is a complete pass over the entire training dataset.
+        :param reg_lambda: Regularization parameter. Helps to avoid overfitting by penalizing large weights.
+
         The regularization term (self.W ** 2) pushes W towards zero, leading to a uniform distribution.
         This process is a form of regularization akin to Laplace smoothing in the tabular form,
         balancing between matching the data-driven probabilities and maintaining a uniform distribution.
-
-        :param learning_rate: Learning rate for gradient descent.
-        :param epochs: Number of training iterations.
-        :param reg_lambda: Regularization parameter.
         """
+
+        # Re-initialize network weights for training
         self.W = self.initialize_network()
 
         for epoch in range(epochs):
+            # Convert input indices to one-hot encoded tensors, which are suitable for processing by the neural network.
             xenc = F.one_hot(self.xs, num_classes=27).float()
+
+            # Forward pass: compute predicted probabilities using the current state of the network
             probs = self.forward_pass(xenc)
-            
-            # Compute loss with regularization
-            loss = -torch.log(probs[torch.arange(len(self.xs)), self.ys]).mean()
-            loss += reg_lambda * (self.W ** 2).mean()  # Regularization term
+
+            # Step 1: Gather the predicted probabilities for the actual next characters
+            # torch.arange(len(self.xs)) creates a tensor [0, 1, 2, ..., len(self.xs)-1], 
+            # which is used to select the corresponding row in 'probs'.
+            # self.ys contains the actual next character indices, which is used to select
+            # the corresponding column in 'probs'. This results in a tensor where each element
+            # is the predicted probability of the actual next character.
+            correct_probs = probs[torch.arange(len(self.xs)), self.ys]
+
+            # Step 2: Compute the negative log likelihood
+            # torch.log computes the logarithm of each element in 'correct_probs'.
+            # Since we are calculating the negative log likelihood, we negate the result.
+            neg_log_likelihood = -torch.log(correct_probs)
+
+            # Step 3: Calculate the mean loss
+            # The mean() function calculates the average of all elements in 'neg_log_likelihood'.
+            # This gives us a single scalar value representing the average loss across all predictions.
+            mean_loss = neg_log_likelihood.mean()
+
+            # Step 4: Apply regularization to the loss
+            # Regularization helps to prevent the model from overfitting. It is calculated as the
+            # mean of the squared weights, multiplied by the regularization lambda.
+            reg_loss = reg_lambda * (self.W ** 2).mean()
+
+            # Step 5: Combine mean loss and regularization loss
+            loss = mean_loss + reg_loss
+
+            # Print the loss for this epoch to monitor the training progress
             print(f'Epoch {epoch}, Loss: {loss.item()}')
 
-            # Backward pass and update weights
-            self.W.grad = None
-            loss.backward()
+            # Backward pass: compute the gradient of the loss with respect to the weights (W).
+            self.W.grad = None  # Clear any existing gradients
+            loss.backward()  # Compute new gradients
+
+            # Update weights using gradient descent. The learning rate determines the size of the update step.
             with torch.no_grad():
                 self.W -= learning_rate * self.W.grad

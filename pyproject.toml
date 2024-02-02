@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "llm-from-scratch"
+name = "awesome-llm"
 version = "0.1.0"
 description = ""
 authors = ["Piergiuseppe Mallozzi <piergiuseppe.mallozzi@gmail.com>"]

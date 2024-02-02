@@ -5,7 +5,7 @@ from pathlib import Path
 def main():
     # Initialize the generator with a sample dataset
     file_folder = Path(__file__).parent
-    generator = BigramNameGenerator(file_folder / "names.txt")
+    generator = BigramNameGenerator(file_folder.parent / "names.txt")
 
     # Generating plots
     generator.save_plot(None, "top_bigrams.pdf", "bigram")
