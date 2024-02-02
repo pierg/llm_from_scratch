@@ -5,7 +5,7 @@ import seaborn as sns
 from pathlib import Path
 import torch.nn.functional as F
 
-from simple.utils import create_mappings, read_words
+from educational.utils import create_mappings, read_words
 
 
 output_folder = Path(__file__).parent / "output"
