@@ -1,6 +1,6 @@
 import torch
 from pathlib import Path
-from awesome_llm.models.mlp_model import MLPModel
+from awesome_llm.modules.mlp_model import MLPModel
 
 from data.names_data_loader import NamesDataLoader
 
