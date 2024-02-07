@@ -1,11 +1,11 @@
 import numpy as np
 import torch
-from awesome_llm.modules.base import SimpleModule
 from awesome_llm.modules.embedding import Embedding
-from awesome_llm.utils.math import cross_entropy_loss, multinomial, softmax
 
 
-class BigramLM(SimpleModule):
+import torch.nn as nn
+
+class BigramLM(nn.Module):
     """
     A Bigram Language Model using a custom embedding layer.
     """

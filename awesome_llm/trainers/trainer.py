@@ -1,6 +1,5 @@
 import torch
 from awesome_llm.data.base_data import BatchGenerator
-from awesome_llm.modules.base import SimpleModule
 from awesome_llm.optimizers.base import Optimizer
 from typing import Callable
 
@@ -10,7 +9,9 @@ class Trainer:
     Handles the training loop, loss calculation, and evaluation.
     """
 
-    def __init__(self, data: BatchGenerator, model: SimpleModule, optimizer: Optimizer, loss_fn: Callable):
+    import torch.nn as nn
+
+    def __init__(self, data: BatchGenerator, model: nn.Module, optimizer: Optimizer, loss_fn: Callable):
         """
         Initializes the Trainer with data, model, optimizer, and loss function.
         """
@@ -46,17 +47,20 @@ class Trainer:
 
             # Periodically evaluate the model and print the losses
             if iter % eval_interval == 0:
-                losses = self.evaluate_loss(eval_interval, batch_size)
+                losses = self.evaluate_loss(batch_size)
                 print(f'Iter {iter:4d} | Train Loss {losses["train"]:6.4f} | Val Loss {losses["val"]:6.4f}')
 
-    def evaluate_loss(self, eval_interval: int, batch_size: int) -> dict:
+    @torch.no_grad() # Disable gradient calculation for this function
+    def evaluate_loss(self, batch_size: int) -> dict:
         """
         Evaluates the model's performance on the train and validation sets.
         Returns a dictionary of average losses for each set.
         """
-        eval_iters = 200  # Number of iterations for evaluation
         out = {}
-
+        
+        self.model.eval() # Set model to evaluation mode
+        eval_iters = 200
+        
         # Loop over both train and validation sets
         for split in ['train', 'val']:
             losses = torch.zeros(eval_iters)
@@ -77,5 +81,6 @@ class Trainer:
 
             # Store the mean loss for the current split
             out[split] = losses.mean()
-
+        
+        self.model.train() # Set model back to training mode
         return out

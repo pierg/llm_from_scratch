@@ -1,10 +1,10 @@
 
 import numpy as np
 import torch
-from awesome_llm.modules.base import SimpleModule
 
+import torch.nn as nn
 
-class Embedding(SimpleModule):
+class Embedding(nn.Module):
     """
     A simple embedding layer.
     """
@@ -16,9 +16,7 @@ class Embedding(SimpleModule):
         :param embedding_dim: The size of each embedding vector.
         """
         super().__init__()
-        self.weight = torch.randn(num_embeddings, embedding_dim, requires_grad=True)
-        self.add_parameter('weight', self.weight)
-        
+        self.weight = torch.randn(num_embeddings, embedding_dim, requires_grad=True)        
 
     def forward(self, indices: torch.Tensor) -> torch.Tensor:
         """
