@@ -1,6 +1,5 @@
-import numpy as np
 import torch
-from awesome_llm.modules.embedding import Embedding
+from awesome_llm.modules.default.embedding import Embedding
 
 
 import torch.nn as nn
