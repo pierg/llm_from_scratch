@@ -10,8 +10,6 @@ from torchview import draw_graph
 
 from bertviz import head_view, model_view
 
-from steps.utils import save_model_info
-
 
 def pretty_print_tensor(tensor: torch.Tensor, name: str = "Tensor", num_entries: int = 2):
     """
@@ -114,8 +112,8 @@ class Head(nn.Module):
     def __init__(self, head_size, n_embd=config["n_embd"], dropout_probability=config["dropout"], block_size=config["block_size"]):
         super().__init__()
 
-        self.key = nn.Linear(n_embd, head_size, bias=False) # Token-specific "What am I looking for?" information
-        self.query = nn.Linear(n_embd, head_size, bias=False) # Token-specific "What do I contain?" information
+        self.key = nn.Linear(n_embd, head_size, bias=False)     # Token-specific "What am I looking for?" information
+        self.query = nn.Linear(n_embd, head_size, bias=False)   # Token-specific "What do I contain?" information
 
         self.value = nn.Linear(n_embd, head_size, bias=False)
         
@@ -255,10 +253,63 @@ class BigramLanguageModel(nn.Module):
 # Model
 model = BigramLanguageModel()
 m = model.to(device)
+print(sum(p.numel() for p in m.parameters())/1e6, 'M parameters') # print the number of parameters in the model
 
 
-save_model_info(m, input_tensor=torch.zeros((1, 1), dtype=torch.long, device=device), folder=Path(__file__).parent / "info")
+print("Model architecture:")
+# Assume 'model' is your PyTorch model and it is already loaded or defined
+model.eval()
 
+
+dummy_input = torch.zeros((1, 1), dtype=torch.long, device=device)
+
+# Define the path for the ONNX file
+onnx_path = Path(__file__).parent / 'model.onnx' 
+
+# Export the model
+torch.onnx.export(model,               # model being run
+                  dummy_input,         # model input (or a tuple for multiple inputs)
+                  onnx_path,           # where to save the model
+                  export_params=True,  # store the trained parameter weights inside the model file
+                  opset_version=11,    # the ONNX version to export the model to
+                  do_constant_folding=True,  # whether to execute constant folding for optimization
+                  input_names = ['input'],   # the model's input names
+                  output_names = ['output'], # the model's output names
+                  dynamic_axes={'input': {0: 'batch_size'},    # variable length axes
+                                'output': {0: 'batch_size'}})
+
+print("Architecture exported to ONNX")
+
+
+print("Tochviz make_dot")
+y = model(dummy_input)
+
+dot = make_dot(y, params=dict(model.named_parameters()), show_attrs=False, show_saved=True)
+dot.render('_model_graph', format='pdf')  # This saves the graph as 'model_graph.png' in the current directory
+
+
+
+# # Generate text from the model
+# context = torch.zeros((1, 1), dtype=torch.long, device=device)     # Start with single token as context
+# print(decode(m.generate(context, max_new_tokens=5)[0].tolist()))
+
+
+print("\n\nGenerate Summary")
+summary(model, input_data=torch.zeros((1, 1), dtype=torch.long, device=device))
+
+
+print("\nDrew Graph")
+model_graph = draw_graph(model, 
+                            input_data=torch.zeros((1, 1), 
+                            dtype=torch.long, device=device), 
+                            device=device, 
+                            expand_nested=True, 
+                            hide_inner_tensors=True,
+                            hide_module_functions=False,
+                            roll=False,
+                            depth=20)
+graph = model_graph.visual_graph
+graph.render('_model_layers', format='pdf') 
 
 # Create a PyTorch optimizer
 opt = torch.optim.AdamW(model.parameters(), lr=learning_rate)

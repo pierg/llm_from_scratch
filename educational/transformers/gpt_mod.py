@@ -1,52 +1,20 @@
 import torch
 import torch.nn as nn
-import toml
-import torch.onnx
 from torch.nn import functional as F
 from pathlib import Path
-from torchviz import make_dot
-from torchinfo import summary
-from torchview import draw_graph
 
-from bertviz import head_view, model_view
-
-from steps.utils import save_model_info
-
-
-def pretty_print_tensor(tensor: torch.Tensor, name: str = "Tensor", num_entries: int = 2):
-    """
-    Pretty prints information about a PyTorch tensor.
-
-    :param tensor: The tensor to be printed.
-    :param num_entries: The number of entries from the tensor to display (default is 10).
-    """
-    print("-------------------")
-    print(f"{name} Information:")
-    print(f"Shape: {tensor.shape}\tDatatype: {tensor.dtype}")  # Print the shape and datatype of the tensor
-    print(f"Data: {tensor.tolist()[:num_entries]}...")  # Print the first few entries of the tensor followed by "..."  
-
-
+# Hyperparameters
+batch_size = 64      # How many independent sequences to process at once?
+block_size = 256     # What is the maximum context length for predictions?
+max_iters = 5000     # How many training iterations to run?
+eval_interval = 500  # How often to evaluate the model on the validation set?
+learning_rate = 3e-4 # Learning rate for Adam optimizer (found through trial and error)
 device = 'cuda' if torch.cuda.is_available() else 'cpu' # Don't run on CPU if possible (it's slow. really.)
-
-
-# Load config from TOML file
-config_path = Path(__file__).parent / 'config_tiny.toml'  # Update this path
-config = toml.load(config_path)
-
-
-# Assigning hyperparameters from config
-batch_size = config["batch_size"]  # How many independent sequences to process at once?
-block_size = config["block_size"]  # What is the maximum context length for predictions?
-max_iters = config["max_iters"]    # How many training iterations to run?
-eval_interval = config["eval_interval"]  # How often to evaluate the model on the validation set?
-learning_rate = config["learning_rate"]  # Learning rate for Adam optimizer (found through trial and error)
-eval_iters = config["eval_iters"]  # How many batches to use per loss evaluation?
-n_embd = config["n_embd"]          # Number of hidden units in the Transformer (384/6 = 64 dimensions per head)
-n_head = config["n_head"]          # Number of attention heads in a single Transformer layer
-n_layer = config["n_layer"]        # Number of Transformer layers
-dropout = config["dropout"]        # Dropout probability
-
-
+eval_iters = 200     # How many batches to use per loss evaluation?
+n_embd = 384         # Number of hidden units in the Transformer (384/6 = 64 dimensions per head)
+n_head = 6           # Number of attention heads in a single Transformer layer
+n_layer = 6          # Number of Transformer layers
+dropout = 0.2        # Dropout probability
 
 torch.manual_seed(1337)
 
@@ -111,12 +79,10 @@ class Head(nn.Module):
         dropout_probability (float): Probability of an element to be zeroed in the dropout step.
         block_size (int): Maximum sequence length that this model can handle.
     """
-    def __init__(self, head_size, n_embd=config["n_embd"], dropout_probability=config["dropout"], block_size=config["block_size"]):
+    def __init__(self, head_size, n_embd=n_embd, dropout_probability=drop, block_size):
         super().__init__()
-
-        self.key = nn.Linear(n_embd, head_size, bias=False) # Token-specific "What am I looking for?" information
-        self.query = nn.Linear(n_embd, head_size, bias=False) # Token-specific "What do I contain?" information
-
+        self.key = nn.Linear(n_embd, head_size, bias=False)
+        self.query = nn.Linear(n_embd, head_size, bias=False)
         self.value = nn.Linear(n_embd, head_size, bias=False)
         
         # Lower triangular matrix for masking, ensuring causality in attention
@@ -134,22 +100,18 @@ class Head(nn.Module):
         Returns:
             torch.Tensor: Output tensor after applying self-attention and weighted aggregation of values, of shape (B, T, head_size).
         """
-        B, T, C = x.shape  # Batch size (B), sequence length (T), embedding dimension (C = n_embd)
+        B, T, C = x.shape  # Batch size (B), sequence length (T), embedding dimension (C)
         
+        # Compute key, query, and value vectors
         k = self.key(x)   # (B,T,C) -> (B,T, head_size), transforming input to key vectors
-
         q = self.query(x) # (B,T,C) -> (B,T, head_size), transforming input to query vectors
-
         v = self.value(x) # (B,T,C) -> (B,T, head_size), transforming input to value vectors
         
-        # Calculate attention scores by dot product of queries and keys
+        # Calculate attention scores by dot product of queries and keys, scaled by dimension's square root
         # This operation transforms the shapes as follows:
-        # (B, T, head_size) @ (B, head_size, T) -> (B, T, T), computing the attention scores for each query-key pair. For every row of B, we are going to have a T x T matrix giving use the affinities
-        attention_scores = q @ k.transpose(-2, -1) 
-
+        # (B, T, head_size) @ (B, head_size, T) -> (B, T, T), computing the attention scores for each query-key pair
         # Scaling by C**-0.5 (inverse square root of the embedding dimension) for normalization
-        # Used to control the variance, especially at initialization
-        attention_scores = attention_scores * C**-0.5
+        attention_scores = q @ k.transpose(-2, -1) * (head_size ** -0.5)
         
         # Apply masking to the upper triangle of the attention score matrix, setting future tokens' attention to -inf
         # This ensures that the prediction for a position does not depend on future tokens, maintaining causality.
@@ -221,7 +183,6 @@ class BigramLanguageModel(nn.Module):
         self.lm_head = nn.Linear(n_embd, vocab_size)                                         # Linear layer to map the embedding to the vocabulary size
 
     def forward(self, idx, targets=None):
-        # pretty_print_tensor(idx)
         B, T = idx.shape
 
         # idx and targets are both (B,T) tensor of integers
@@ -255,10 +216,7 @@ class BigramLanguageModel(nn.Module):
 # Model
 model = BigramLanguageModel()
 m = model.to(device)
-
-
-save_model_info(m, input_tensor=torch.zeros((1, 1), dtype=torch.long, device=device), folder=Path(__file__).parent / "info")
-
+print(sum(p.numel() for p in m.parameters())/1e6, 'M parameters') # print the number of parameters in the model
 
 # Create a PyTorch optimizer
 opt = torch.optim.AdamW(model.parameters(), lr=learning_rate)
@@ -279,3 +237,6 @@ for iter in range(max_iters):
     if iter % 1000 == 0:
         torch.save(model, f"model_{iter}.pt")
 
+# Generate text from the model
+context = torch.zeros((1, 1), dtype=torch.long, device=device)     # Start with single token as context
+print(decode(m.generate(context, max_new_tokens=500)[0].tolist()))

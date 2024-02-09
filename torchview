@@ -1,0 +1,450 @@
+strict digraph model {
+	graph [ordering=in rankdir=TB size="37.5,37.5"]
+	node [align=left fontname="Linux libertine" fontsize=10 height=0.2 margin=0 ranksep=0.1 shape=plaintext style=filled]
+	edge [fontsize=10]
+	0 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                        <TR><TD>input-tensor<BR/>depth:0</TD><TD>(1, 1)</TD></TR>
+                    </TABLE>> fillcolor=lightyellow]
+	subgraph cluster_2 {
+		fontsize=12 label=Embedding labeljust=l style=dashed
+		1 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">embedding<BR/>depth:2</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+	}
+	subgraph cluster_3 {
+		fontsize=12 label=Embedding labeljust=l style=dashed
+		2 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">embedding<BR/>depth:2</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1,) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+	}
+	3 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">add<BR/>depth:1</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128), (1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+	subgraph cluster_4 {
+		fontsize=12 label=Sequential labeljust=l style=dashed
+		subgraph cluster_5 {
+			fontsize=12 label=Block labeljust=l style=dashed
+			subgraph cluster_6 {
+				fontsize=12 label=LayerNorm labeljust=l style=dashed
+				4 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">layer_norm<BR/>depth:4</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+			}
+			subgraph cluster_7 {
+				fontsize=12 label=MultiHeadAttention labeljust=l style=dashed
+				subgraph cluster_8 {
+					fontsize=12 label=Head labeljust=l style=dashed
+					subgraph cluster_9 {
+						fontsize=12 label=Linear labeljust=l style=dashed
+						5 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					subgraph cluster_10 {
+						fontsize=12 label=Linear labeljust=l style=dashed
+						6 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					subgraph cluster_11 {
+						fontsize=12 label=Linear labeljust=l style=dashed
+						7 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					8 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">transpose<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 128, 1) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					9 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">matmul<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128), (1, 128, 1) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					10 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">mul<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					11 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">masked_fill<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					12 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">softmax<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					subgraph cluster_12 {
+						fontsize=12 label=Dropout labeljust=l style=dashed
+						13 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">dropout<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 1) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					14 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">matmul<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 1), (1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+				}
+				15 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">cat<BR/>depth:4</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+				subgraph cluster_13 {
+					fontsize=12 label=Linear labeljust=l style=dashed
+					16 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+				}
+				subgraph cluster_14 {
+					fontsize=12 label=Dropout labeljust=l style=dashed
+					17 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">dropout<BR/>depth:5</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+				}
+			}
+			18 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">add<BR/>depth:3</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">2 x (1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+			subgraph cluster_15 {
+				fontsize=12 label=LayerNorm labeljust=l style=dashed
+				19 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">layer_norm<BR/>depth:4</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+			}
+			subgraph cluster_16 {
+				fontsize=12 label=FeedFoward labeljust=l style=dashed
+				subgraph cluster_17 {
+					fontsize=12 label=Sequential labeljust=l style=dashed
+					subgraph cluster_18 {
+						fontsize=12 label=Linear labeljust=l style=dashed
+						20 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 512) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					subgraph cluster_19 {
+						fontsize=12 label=ReLU labeljust=l style=dashed
+						21 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">relu<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 512) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 512) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					subgraph cluster_20 {
+						fontsize=12 label=Linear labeljust=l style=dashed
+						22 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 512) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+					subgraph cluster_21 {
+						fontsize=12 label=Dropout labeljust=l style=dashed
+						23 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">dropout<BR/>depth:6</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+					}
+				}
+			}
+			24 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">add<BR/>depth:3</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">2 x (1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+		}
+	}
+	subgraph cluster_22 {
+		fontsize=12 label=LayerNorm labeljust=l style=dashed
+		25 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">layer_norm<BR/>depth:2</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+	}
+	subgraph cluster_23 {
+		fontsize=12 label=Linear labeljust=l style=dashed
+		26 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">linear<BR/>depth:2</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(1, 1, 128) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(1, 1, 65) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+		27 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                        <TR><TD>output-tensor<BR/>depth:0</TD><TD>(1, 1, 65)</TD></TR>
+                    </TABLE>> fillcolor=lightyellow]
+	}
+	0 -> 1
+	1 -> 3
+	2 -> 3
+	3 -> 18
+	3 -> 4
+	4 -> 5
+	5 -> 8
+	4 -> 6
+	6 -> 9
+	4 -> 7
+	7 -> 14
+	8 -> 9
+	9 -> 10
+	10 -> 11
+	11 -> 12
+	12 -> 13
+	13 -> 14
+	14 -> 15
+	15 -> 16
+	16 -> 17
+	17 -> 18
+	18 -> 24
+	18 -> 19
+	19 -> 20
+	20 -> 21
+	21 -> 22
+	22 -> 23
+	23 -> 24
+	24 -> 25
+	25 -> 26
+	26 -> 27
+}

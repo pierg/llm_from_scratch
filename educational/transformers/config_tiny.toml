@@ -1,0 +1,31 @@
+# config.toml
+
+# Number of independent sequences to process at once
+batch_size = 1
+
+# Maximum context length for predictions
+block_size = 2
+
+# Number of training iterations to run
+max_iters = 5000
+
+# How often to evaluate the model on the validation set
+eval_interval = 500
+
+# Learning rate for Adam optimizer (found through trial and error)
+learning_rate = 0.0003
+
+# Number of batches to use per loss evaluation
+eval_iters = 200
+
+# Number of hidden units in the Transformer (384/6 = 64 dimensions per head)
+n_embd = 128
+
+# Number of attention heads in a single Transformer layer
+n_head = 1
+
+# Number of Transformer layers
+n_layer = 1
+
+# Dropout probability
+dropout = 0.2

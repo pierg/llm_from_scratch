@@ -7,7 +7,7 @@ class Head(nn.Module):
     """ one head of self-attention """
     def __init__(self, head_size, n_embd, dropout_probability, block_size):
         super().__init__()
-        self.key = Linear(n_embd, head_size, bias=False)
+        self.key = nn.Linear(n_embd, head_size, bias=False)
         self.query = Linear(n_embd, head_size, bias=False)
         self.value = Linear(n_embd, head_size, bias=False)
         self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size))) # Register a buffer so that it is not a parameter of the model
@@ -15,7 +15,7 @@ class Head(nn.Module):
         self.dropout = nn.Dropout(dropout_probability)
 
     def forward(self, x):
-        B,T,C = x.shape   # Batch size, block size, vocab size (each token is a vector of size 32)
+        B,T,C = x.shape   # Batch size, block size (Time), vocab size (each token is a vector of size 32)
         k = self.key(x)   # (B,T,C) -> (B,T, head_size)
         q = self.query(x) # (B,T,C) -> (B,T, head_size)
         # Compute attention scores ("affinities")
