@@ -47,6 +47,8 @@ class GPT_v6(nn.Module):
         B, T = indices.shape
         position_indices = torch.arange(T, device=device).expand(B, -1)  # Generate position indices for the sequence
         tok_emb = self.token_embedding_table(indices)  # Token embeddings
+        print(position_indices.shape)
+        print(self.position_embedding_table.weight.shape)
         pos_emb = self.position_embedding_table(position_indices)  # Positional embeddings
         x = tok_emb + pos_emb  # Combine token and position embeddings
         
