@@ -1,44 +1,44 @@
 digraph {
 	graph [size="12,12"]
 	node [align=left fontname=monospace fontsize=10 height=0.2 ranksep=0.1 shape=box style=filled]
-	5805287536 [label="
+	5547356912 [label="
  (1, 1, 65)" fillcolor=darkolivegreen1]
-	5807942016 [label=ViewBackward0]
-	5807942208 -> 5807942016
-	5807942208 -> 5805287440 [dir=none]
-	5805287440 [label="mat1
+	5550092016 [label=ViewBackward0]
+	5550091296 -> 5550092016
+	5550091296 -> 5550264816 [dir=none]
+	5550264816 [label="mat1
  (1, 32)" fillcolor=orange]
-	5807942208 -> 5807979312 [dir=none]
-	5807979312 [label="mat2
+	5550091296 -> 5550269232 [dir=none]
+	5550269232 [label="mat2
  (32, 65)" fillcolor=orange]
-	5807942208 [label=AddmmBackward0]
-	5807943024 -> 5807942208
-	4911843856 [label="lm_head.bias
+	5550091296 [label=AddmmBackward0]
+	5550091488 -> 5550091296
+	5349118832 [label="lm_head.bias
  (65)" fillcolor=lightblue]
-	4911843856 -> 5807943024
-	5807943024 [label=AccumulateGrad]
-	5807942160 -> 5807942208
-	5807942160 [label=ViewBackward0]
-	5807943216 -> 5807942160
-	5807943216 -> 4911843568 [dir=none]
-	4911843568 [label="indices
+	5349118832 -> 5550091488
+	5550091488 [label=AccumulateGrad]
+	5550091344 -> 5550091296
+	5550091344 [label=ViewBackward0]
+	5550094992 -> 5550091344
+	5550094992 -> 5349118352 [dir=none]
+	5349118352 [label="indices
  (1, 1)" fillcolor=orange]
-	5807943216 [label=EmbeddingBackward0]
-	5807943120 -> 5807943216
-	4911843664 [label="token_embedding_table.weight
+	5550094992 [label=EmbeddingBackward0]
+	5550093264 -> 5550094992
+	5349118640 [label="token_embedding_table.weight
  (65, 32)" fillcolor=lightblue]
-	4911843664 -> 5807943120
-	5807943120 [label=AccumulateGrad]
-	5807942736 -> 5807942208
-	5807942736 [label=TBackward0]
-	5807943552 -> 5807942736
-	4911843760 [label="lm_head.weight
+	5349118640 -> 5550093264
+	5550093264 [label=AccumulateGrad]
+	5550092064 -> 5550091296
+	5550092064 [label=TBackward0]
+	5550094608 -> 5550092064
+	5349118736 [label="lm_head.weight
  (65, 32)" fillcolor=lightblue]
-	4911843760 -> 5807943552
-	5807943552 [label=AccumulateGrad]
-	5807942016 -> 5805287536
-	5807980080 [label="
+	5349118736 -> 5550094608
+	5550094608 [label=AccumulateGrad]
+	5550092016 -> 5547356912
+	5550263952 [label="
  (1, 65)" fillcolor=darkolivegreen3]
-	5807942208 -> 5807980080
-	5807980080 -> 5805287536 [style=dotted]
+	5550091296 -> 5550263952
+	5550263952 -> 5547356912 [style=dotted]
 }

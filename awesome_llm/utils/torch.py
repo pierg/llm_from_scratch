@@ -6,7 +6,7 @@ from torchinfo import summary
 from torchview import draw_graph
 
 
-def save_model_info(model: nn.Module, input_tensor: torch.Tensor, folder: Path) -> None:
+def save_model_info(model: nn.Module, input_tensor: torch.Tensor, folder: Path, id="") -> None:
     """
     Save model architecture views, info, and ONNX export to files, with model state management.
     Also, clean up any intermediate files generated in the process.
@@ -28,8 +28,8 @@ def save_model_info(model: nn.Module, input_tensor: torch.Tensor, folder: Path) 
     
     try:
         # Export the model to ONNX format
-        onnx_path = folder / f"model_{name}.onnx"
-        torch.onnx.export(model,                                    # model being run
+        onnx_path = folder / f"model_{id}_{name}.onnx"
+        torch.onnx.export(model,                                  # model being run
                     input_tensor,                                 # model input (or a tuple for multiple inputs)
                     onnx_path,                                    # where to save the 
                     verbose=False,                                # print out a verbose ONNX representation of the model
@@ -47,7 +47,7 @@ def save_model_info(model: nn.Module, input_tensor: torch.Tensor, folder: Path) 
             output = model(input_tensor)
             parameters = dict(model.named_parameters())
             graph = make_dot(output, parameters, show_attrs=False, show_saved=True)
-            torchviz_path = folder / f"torchviz_{name}"
+            torchviz_path = folder / f"torchviz_{id}_{name}"
             graph.render(torchviz_path.stem, format="pdf")
             print(f"Torchviz graph saved to {torchviz_path}.pdf")
         except AttributeError as e:
@@ -58,7 +58,7 @@ def save_model_info(model: nn.Module, input_tensor: torch.Tensor, folder: Path) 
         
         # Save the summary of the model
         model_summary = summary(model, input_data=input_tensor, verbose=0)
-        summary_path = folder / f"torchinfo_{name}.txt"
+        summary_path = folder / f"torchinfo_{id}_{name}.txt"
         with open(summary_path, "w") as f:
             f.write(str(model_summary))
         print(f"Model summary saved to {summary_path}")
@@ -71,15 +71,15 @@ def save_model_info(model: nn.Module, input_tensor: torch.Tensor, folder: Path) 
                                 roll=False,
                                 depth=20)
         graph = model_graph.visual_graph
-        graph.render(folder / f'torchview_{name}', format='pdf')
-        print(f"Torchview graph saved to {folder/'torchview_{name}.pdf'}")
+        graph.render(folder / f'torchview_{id}_{name}', format='pdf')
+        print(f"Torchview graph saved to {folder/'torchview_{id}_{name}.pdf'}")
 
-        intermediate_file = folder / f"torchviz_{name}"
+        intermediate_file = folder / f"torchviz_{id}_{name}"
         if intermediate_file.exists():
             intermediate_file.unlink()
             print(f"Removed intermediate file: {intermediate_file}")
 
-        intermediate_file = folder / f"torchview_{name}"
+        intermediate_file = folder / f"torchview_{id}_{name}"
         if intermediate_file.exists():
             intermediate_file.unlink()
             print(f"Removed intermediate file:  {intermediate_file}")
